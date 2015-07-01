@@ -1,4 +1,12 @@
 %% Problem 3: Auto correlation to find periodicity (Matlab required)
+%{
+Explanation:
+The frequency of the autocorrelation of a signal is equal to the frequency
+of the original signal. This is true since the corss correlation between
+two signals is essentially the convolution of those signals. We can find
+the frequency of the original signal with noise added by finding the
+frequency of the autocorrelation.
+%}
 clear all; close all; clc;
 
 measured_data;
