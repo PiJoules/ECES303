@@ -1,53 +1,69 @@
 %% Problem 2: Resolution of sine waves
+%{
+What I did:
+This code essentially just plots the Fourier Transform of the signal
+5*sin(2*pi*1*t)-5*sin(2*pi*1.05*t) over a certain period of time. The
+period over which I should get the data points for this was not given, but
+the number of data points should have been found given a sampling frequency
+of 5 Hz.
+
+The minimum number of samples needed is 5 since the sampling frequency is 
+5 Hz, though I will use something much higher than 5 (64 in this case), 
+since 64 samples will yield enough points on the FT graph that local peaks 
+will be shown clearly, the bin size will be reduced, and the FFT requires 
+a number of data points equal to a power of 2.
+
+A plot of the FT of this signal shows peaks near the highest frequency of
+the signal (1.05 Hz). Padding zeros simply increases the number of points
+that will be shown on the graph and decrease the bin size since all we are
+adding is more data points. The overall spectrum should not be affected.
+
+%}
 clear all; close all; clc;
 
+N = 64; % # of samples
+n = 0:N-1;
 fs = 5;
 Ts = 1/fs;
-% will need min of 5 samples (sampling freq)
-% round up to 8 (power of 2)
-N = 8; % # of samples
-n = 0:N;
 
-t = 0:0.01:N/fs;
 f1 = 1;
 f2 = 1.05;
-x1 = 5*sin(2*pi*f1*t);
-x2 = -5*sin(2*pi*f2*t);
 
-omegaHat = 2*pi*f1/fs;
-sig1 = 5*sin(omegaHat*n);
+% Create the signal
+omegaHat1 = 2*pi*f1/fs;
+omegaHat2 = 2*pi*f2/fs;
+signal = 5*sin(omegaHat1*n)-5*sin(omegaHat2*n);
 
+% Find the bin size and plot the zero centered FT
+bin_inc = fs/N;
+bin_vals = bin_inc*( (-N/2):1:((N/2)-1) );
 figure;
-subplot(2,1,1);
-plot(t,x1);
-grid on;
-subplot(2,1,2);
-stem(n,sig1);
+fftsig = abs(fftshift(fft(signal)));
+stem(bin_vals, fftsig);
+xlabel('Frequency (Hz)');
+ylabel('Magnitude');
+title('FFT of sampled signal');
 
-% f = 5;
-% omega = 2*pi*f;
-% t = 0:0.01:1;
-% x1 = cos(omega*t);
-% 
-% fs1 = 100;
-% omegaHat1 = omega/fs1;
-% n1 = 0:fs1-1;
-% xn1 = cos(omegaHat1*n1);
-% 
-% fs2 = 20;
-% omegaHat2 = omega/fs2;
-% n2 = 0:fs2-1;
-% xn2 = cos(omegaHat2*n2);
-% 
-% figure;
-% subplot(3,1,1);
-% plot(t,x1);
-% grid on;
-% 
-% subplot(3,1,2);
-% stem(n1,xn1);
-% 
-% subplot(3,1,3);
-% stem(n2,xn2);
+% Find the local peaks
+[peaks, freqs] = findpeaks(fftsig, 'MinPeakHeight', 200);
+fprintf('Peaks located at: %.3d Hz and %.3d Hz\n', bin_vals(freqs(1)), bin_vals(freqs(2)));
 
+% Pad zeros (double the size)
+for i = 1:N
+    signal = [signal 0];
+end
 
+% Find the new bin size and graph the new FT of the padded signal
+N = 128;
+bin_inc = fs/N;
+bin_vals = bin_inc*( (-N/2):1:((N/2)-1) );
+figure;
+fftsig = abs(fftshift(fft(signal)));
+stem(bin_vals, fftsig);
+xlabel('Frequency (Hz)');
+ylabel('Magnitude');
+title('FFT of sampled signal (with padded zeros)');
+
+% Find the location of the peaks on the new FT graph
+[peaks, freqs] = findpeaks(fftsig, 'MinPeakHeight', 200);
+fprintf('Peaks (after padding) located at: %.3d Hz and %.3d Hz\n', bin_vals(freqs(1)), bin_vals(freqs(2)));
